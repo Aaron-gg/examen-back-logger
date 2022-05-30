@@ -1,14 +1,28 @@
 'use strict';
 
 const router = require('express').Router();
-const prefix = '';
+const prefix = 'logs';
+const prefixAplication = 'aplication';
 
-const controller = require('../controllers/main.controller');
+const validateData = require('../middlewares/validateData');
+const aplicationValidation = require('../middlewares/schemasValidation/aplicationsValidation');
+const logValidation = require('../middlewares/schemasValidation/logsValidation');
 
-router.get(`${prefix}/`, controller.all);
-router.post(`${prefix}/`, controller.create);
-router.get(`${prefix}/:id`, controller.info);
-router.put(`${prefix}/:id`, controller.update);
-router.delete(`${prefix}/:id`, controller.delete);
+const { verifyT, verifyAplication, verifyLog } = require('../middlewares/verifyToken');
+
+const logController = require('../controllers/logs.controller');
+const aplicationController = require('../controllers/aplications.controller');
+
+router.get(`/${prefixAplication}/`, verifyT, aplicationController.all);
+router.post(`/${prefixAplication}/`, validateData(aplicationValidation), aplicationController.create);
+router.get(`/${prefixAplication}/:id`, verifyAplication, aplicationController.info);
+router.put(`/${prefixAplication}/:id`, [verifyAplication, validateData(aplicationValidation)], aplicationController.update);
+router.delete(`/${prefixAplication}/:id`, verifyAplication, aplicationController.delete);
+
+router.get(`/${prefix}/`, verifyT, logController.all);
+router.post(`/${prefix}/`, [verifyT, validateData(logValidation)], logController.create);
+router.get(`/${prefix}/:id`, verifyLog, logController.info);
+router.put(`/${prefix}/:id`, [verifyLog, validateData(logValidation)], logController.update);
+router.delete(`/${prefix}/:id`, verifyLog, logController.delete);
 
 module.exports = router;
